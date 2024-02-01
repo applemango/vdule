@@ -11,6 +11,8 @@ type Tube struct {
 	Service *youtube.Service
 }
 
+var T, _ = CreateTube()
+
 func CreateTube() (*Tube, error) {
 	client := &http.Client{
 		Transport: &transport.APIKey{Key: "AIzaSyA2KkxjSd-s5ydoVPCym9yOH9lsyInxoKE"},
