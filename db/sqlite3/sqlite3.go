@@ -1,4 +1,4 @@
-package sqlite3
+package db
 
 import (
 	"database/sql"
@@ -6,10 +6,10 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-var DB *sql.DB = NewClient()
+var Conn *sql.DB = NewClient()
 
 func Execute(query string) (any, error) {
-	res, err := DB.Exec(query)
+	res, err := Conn.Exec(query)
 	return res, err
 }
 
