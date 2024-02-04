@@ -9,24 +9,23 @@ import (
 )
 
 type TubeVideo struct {
-	Id                     string
-	ChannelId              string
-	Title                  string
-	Description            string
-	ViewCount              uint64
-	LikeCount              uint64
-	CommentCount           uint64
-	PublishedAt            string
-	Tags                   []string
-	LiveBroadCastContent   string
-	isLive                 bool
-	isLiveUpcoming         bool
-	LiveActualStartTime    string
-	LiveActualEndTime      string
-	LiveScheduledStartTime string
-	LiveScheduledEndTime   string
-
-	Duration string
+	Id                     string   `json:"id,omitempty"`
+	ChannelId              string   `json:"channel_id,omitempty"`
+	Title                  string   `json:"title,omitempty"`
+	Description            string   `json:"description,omitempty"`
+	ViewCount              uint64   `json:"view_count,omitempty"`
+	LikeCount              uint64   `json:"like_count,omitempty"`
+	CommentCount           uint64   `json:"comment_count,omitempty"`
+	PublishedAt            string   `json:"published_at,omitempty"`
+	Tags                   []string `json:"tags,omitempty"`
+	LiveBroadCastContent   string   `json:"live_broad_cast_content,omitempty"`
+	isLive                 bool     `json:"is_live,omitempty"`
+	isLiveUpcoming         bool     `json:"is_live_upcoming,omitempty"`
+	LiveActualStartTime    string   `json:"live_actual_start_time,omitempty"`
+	LiveActualEndTime      string   `json:"live_actual_end_time,omitempty"`
+	LiveScheduledStartTime string   `json:"live_scheduled_start_time,omitempty"`
+	LiveScheduledEndTime   string   `json:"live_scheduled_end_time,omitempty"`
+	Duration               string   `json:"duration,omitempty"`
 }
 
 func GetPlayListVideosIdCache(id string, max int64) ([]string, bool) {
@@ -115,12 +114,7 @@ func (t *Tube) GetRawVideo(id string) (*youtube.Video, error) {
 	return res.Items[0], nil
 }
 
-func (t *Tube) GetVideo(id string) (*TubeVideo, error) {
-	item, err := t.GetRawVideo(id)
-	if err != nil {
-		return nil, err
-	}
-
+func VideoToTubeVideo(item *youtube.Video) TubeVideo {
 	actualStartTime, actualEndTime, scheduledStartTime, scheduledEndTime := "", "", "", ""
 	if item.LiveStreamingDetails != nil {
 		actualStartTime = item.LiveStreamingDetails.ActualStartTime
@@ -128,8 +122,7 @@ func (t *Tube) GetVideo(id string) (*TubeVideo, error) {
 		scheduledStartTime = item.LiveStreamingDetails.ScheduledStartTime
 		scheduledEndTime = item.LiveStreamingDetails.ScheduledEndTime
 	}
-
-	return &TubeVideo{
+	return TubeVideo{
 		Id:                     item.Id,
 		ChannelId:              item.Snippet.ChannelId,
 		Title:                  item.Snippet.Title,
@@ -147,5 +140,14 @@ func (t *Tube) GetVideo(id string) (*TubeVideo, error) {
 		LiveScheduledStartTime: scheduledStartTime,
 		LiveScheduledEndTime:   scheduledEndTime,
 		Duration:               item.ContentDetails.Duration,
-	}, nil
+	}
+}
+
+func (t *Tube) GetVideo(id string) (*TubeVideo, error) {
+	item, err := t.GetRawVideo(id)
+	if err != nil {
+		return nil, err
+	}
+	v := VideoToTubeVideo(item)
+	return &v, nil
 }
