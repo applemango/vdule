@@ -2,6 +2,7 @@ package redis
 
 import (
 	"context"
+	"time"
 
 	"github.com/redis/go-redis/v9"
 )
@@ -13,8 +14,12 @@ var DB = redis.NewClient(&redis.Options{
 	DB:       0,
 })
 
-func Push(key string, value string) error {
-	err := DB.Set(Ctx, key, value, 0).Err()
+func Push(key, value string) error {
+	return PushExp(key, value, 0)
+}
+
+func PushExp(key, value string, exp time.Duration) error {
+	err := DB.Set(Ctx, key, value, exp).Err()
 	return err
 }
 

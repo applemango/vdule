@@ -3,6 +3,7 @@ package cache
 import (
 	"encoding/json"
 	"fmt"
+	"time"
 	"vdule/db/redis"
 	"vdule/utils"
 )
@@ -27,12 +28,16 @@ func GetCache[T any](id Id, data *T) (*T, bool) {
 }
 
 func PushCache(id Id, data any) error {
+	return PushCacheExp(id, data, 0)
+}
+
+func PushCacheExp(id Id, data any, exp time.Duration) error {
 	j, err := json.Marshal(data)
 	if err != nil {
 		return err
 	}
 	cache := string(j)
-	err = redis.Push(id.Raw, cache)
+	err = redis.PushExp(id.Raw, cache, exp)
 	if err != nil {
 		return err
 	}
