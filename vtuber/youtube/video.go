@@ -4,8 +4,8 @@ import (
 	"errors"
 	"google.golang.org/api/youtube/v3"
 	"strconv"
-	"vdule/cache"
 	"vdule/utils"
+	"vdule/utils/cache"
 )
 
 type TubeVideo struct {

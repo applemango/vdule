@@ -5,7 +5,7 @@ import (
 	"io"
 	"net/http"
 	"time"
-	"vdule/cache"
+	"vdule/utils/cache"
 )
 
 /*func PushCache(url string, body string) error {

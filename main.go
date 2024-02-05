@@ -4,7 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"vdule/api/handler"
 	"vdule/api/middleware"
-	"vdule/youtube"
+	youtube2 "vdule/vtuber/youtube"
 )
 
 func main() {

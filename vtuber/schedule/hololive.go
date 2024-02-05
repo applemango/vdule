@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strings"
 	"time"
-	db "vdule/db/sqlite3"
+	"vdule/utils/db/sqlite3"
 	"vdule/utils/http"
-	"vdule/youtube"
+	youtube2 "vdule/vtuber/youtube"
 )
 
 // https://schedule.hololive.tv/api/list
@@ -76,6 +76,10 @@ var HololiveChannelId = map[string]string{
 	"沙花叉クロヱ": "SakamataChloe",
 	"ロボ子さん":  "Robocosan",
 	"雪花ラミィ":  "YukihanaLamy",
+	"姫森ルーナ":  "HimemoriLuna",
+	"星街すいせい": "HoshimachiSuisei",
+	"夏色まつり":  "NatsuiroMatsuri",
+	"紫咲シオン":  "MurasakiShion",
 }
 
 func RegisterHololiveSchedule() error {
@@ -93,7 +97,7 @@ func RegisterHololiveSchedule() error {
 			if video.PlatformType != 1 {
 				continue
 			}
-			channel, err := youtube.T.GetChannelByHandle(handle)
+			channel, err := youtube2.T.GetChannelByHandle(handle)
 			if err != nil {
 				return err
 			}
@@ -113,7 +117,7 @@ func RegisterHololiveSchedule() error {
 			   	live_scheduled_start_day,
 			   	live_scheduled_start_hour,
             	live_scheduled_start_minute
-			) VALUES (?, ?, ?, ?, ?, true, ?, ?, ?, ?, ?, ?)`, id, channel.Id, youtube.ParseChannelHandle(handle), video.Title, video.Thumbnail, video.IsLive, date.Year(), date.Month(), date.Day(), date.Hour(), date.Minute())
+			) VALUES (?, ?, ?, ?, ?, true, ?, ?, ?, ?, ?, ?)`, id, channel.Id, youtube2.ParseChannelHandle(handle), video.Title, video.Thumbnail, video.IsLive, date.Year(), date.Month(), date.Day(), date.Hour(), date.Minute())
 			if err != nil {
 				return err
 			}

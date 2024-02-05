@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/reugn/go-quartz/job"
 	"github.com/reugn/go-quartz/quartz"
-	"vdule/schedule"
+	"vdule/vtuber/schedule"
 )
 
 func hololive(ctx context.Context) (any, error) {

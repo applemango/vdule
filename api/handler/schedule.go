@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"strconv"
 	"time"
-	db "vdule/db/sqlite3"
-	"vdule/youtube"
+	"vdule/utils/db/sqlite3"
+	"vdule/vtuber/youtube"
 )
 
 type ScheduleDate struct {
