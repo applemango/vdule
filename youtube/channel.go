@@ -2,6 +2,7 @@ package youtube
 
 import (
 	"google.golang.org/api/youtube/v3"
+	"strings"
 	"vdule/cache"
 )
 
@@ -28,16 +29,25 @@ func GetRawChannelByHandleCache(handle string) (*youtube.Channel, bool) {
 	return nil, false
 }
 
+func ParseChannelHandle(handle string) string {
+	p := handle
+	if p[0] == '@' {
+		p = p[1:]
+	}
+	return strings.ToLower(p)
+}
+
 func (t *Tube) GetRawChannelByHandle(handle string) (*youtube.Channel, error) {
-	if c, in := GetRawChannelByHandleCache(handle); in {
+	h := ParseChannelHandle(handle)
+	if c, in := GetRawChannelByHandleCache(h); in {
 		return c, nil
 	}
-	call := t.Service.Channels.List([]string{"snippet", "contentDetails", "brandingSettings", "statistics"}).ForHandle(handle)
+	call := t.Service.Channels.List([]string{"snippet", "contentDetails", "brandingSettings", "statistics"}).ForHandle(h)
 	res, err := call.Do()
 	if err != nil {
 		return nil, err
 	}
-	cacheId := cache.GetCacheId("channel", "handle", handle)
+	cacheId := cache.GetCacheId("channel", "handle", h)
 	_ = cache.PushCache(cacheId, res.Items[0])
 	return res.Items[0], nil
 }
