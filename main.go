@@ -16,5 +16,6 @@ func main() {
 	app := gin.Default()
 	app.Use(middleware.Cors())
 	app.GET("/channel", handler.GetChannel)
+	app.GET("/schedule", handler.GetSchedules)
 	_ = app.Run(":8081")
 }
