@@ -7,6 +7,7 @@ require (
 	github.com/gin-gonic/gin v1.9.1
 	github.com/mattn/go-sqlite3 v1.14.20
 	github.com/redis/go-redis/v9 v9.4.0
+	github.com/reugn/go-quartz v0.10.0
 	github.com/stretchr/testify v1.8.4
 	github.com/wenerme/go-req v0.10.1
 	google.golang.org/api v0.159.0
