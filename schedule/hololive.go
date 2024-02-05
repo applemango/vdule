@@ -109,7 +109,7 @@ func RegisterHololiveSchedule() error {
 			   	live_scheduled_start_day,
 			   	live_scheduled_start_hour,
             	live_scheduled_start_minute
-			) VALUES (?, ?, ?, ?, ?, true, ?, ?, ?, ?, ?, ?)`, id, channel.Id, handle, video.Title, video.Thumbnail, video.IsLive, date.Year(), date.Month(), date.Day(), date.Hour(), date.Minute())
+			) VALUES (?, ?, ?, ?, ?, true, ?, ?, ?, ?, ?, ?)`, id, channel.Id, youtube.ParseChannelHandle(handle), video.Title, video.Thumbnail, video.IsLive, date.Year(), date.Month(), date.Day(), date.Hour(), date.Minute())
 			if err != nil {
 				return err
 			}

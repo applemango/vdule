@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"database/sql"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
@@ -29,6 +30,7 @@ type Schedule struct {
 func GetSchedules(c *gin.Context) {
 	now := time.Now()
 	year, month, day := now.Year(), int(now.Month()), now.Day()
+	var handle *string
 	if y, in := c.GetQuery("year"); in {
 		year, _ = strconv.Atoi(y)
 	}
@@ -38,18 +40,39 @@ func GetSchedules(c *gin.Context) {
 	if d, in := c.GetQuery("day"); in {
 		day, _ = strconv.Atoi(d)
 	}
-	rows, err := db.Conn.Query(`SELECT
-    	id,
-    	handle,
-    	title,
-    	thumbnail,
-    	is_now_on_air,
-    	live_scheduled_start_year,
-    	live_scheduled_start_month,
-    	live_scheduled_start_day,
-    	live_scheduled_start_hour,
-    	live_scheduled_start_minute
-	FROM video WHERE live_scheduled_start_year = ? AND live_scheduled_start_month = ? AND live_scheduled_start_day = ? AND is_live = true`, year, month, day)
+	if h, in := c.GetQuery("handle"); in {
+		p := youtube.ParseChannelHandle(h)
+		handle = &p
+	}
+	var rows *sql.Rows
+	var err error
+	if handle != nil {
+		rows, err = db.Conn.Query(`SELECT
+    		id,
+    		handle,
+    		title,
+    		thumbnail,
+    		is_now_on_air,
+    		live_scheduled_start_year,
+    		live_scheduled_start_month,
+    		live_scheduled_start_day,
+    		live_scheduled_start_hour,
+    		live_scheduled_start_minute
+		FROM video WHERE live_scheduled_start_year = ? AND live_scheduled_start_month = ? AND live_scheduled_start_day = ? AND is_live = true AND handle = ?`, year, month, day, handle)
+	} else {
+		rows, err = db.Conn.Query(`SELECT
+    		id,
+    		handle,
+    		title,
+    		thumbnail,
+    		is_now_on_air,
+    		live_scheduled_start_year,
+    		live_scheduled_start_month,
+    		live_scheduled_start_day,
+    		live_scheduled_start_hour,
+    		live_scheduled_start_minute
+		FROM video WHERE live_scheduled_start_year = ? AND live_scheduled_start_month = ? AND live_scheduled_start_day = ? AND is_live = true`, year, month, day)
+	}
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, "500")
 		return
