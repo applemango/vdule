@@ -35,7 +35,11 @@ type HololiveScheduleApiResult struct {
 
 func GetHololiveRawSchedule() (*HololiveScheduleApiResult, error) {
 	var data *HololiveScheduleApiResult
-	if err := http.HttpGetStructCacheExp("https://schedule.hololive.tv/api/list", &data, time.Hour); err != nil {
+	/*
+	 * https://schedule.hololive.tv/api/list
+	 * このapiの更新頻度は15分に一度
+	 */
+	if err := http.HttpGetStructCacheExp("https://schedule.hololive.tv/api/list", &data, time.Minute*15); err != nil {
 		return nil, err
 	}
 	return data, nil
@@ -113,6 +117,7 @@ func RegisterHololiveSchedule() error {
 			if err != nil {
 				return err
 			}
+			fmt.Printf("[info] add %v's video: %v\n", video.Talent.Name, video.Name)
 		}
 	}
 	return nil
