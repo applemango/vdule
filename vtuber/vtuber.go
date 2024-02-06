@@ -111,6 +111,10 @@ func GetVtubers() ([]Vtuber, error) {
 	return GetVtubersCore(`SELECT id, handle, name, description, organization_id, is_crawl FROM vtuber`)
 }
 
+func GetVtubersByOrganization(organizationId int32) ([]Vtuber, error) {
+	return GetVtubersCore(`SELECT id, handle, name, description, organization_id, is_crawl FROM vtuber WHERE organization_id = ?`, organizationId)
+}
+
 type RegisterVtuberProps struct {
 	Handle         string   `json:"handle,omitempty"`
 	Tags           []string `json:"tags,omitempty"`
