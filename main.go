@@ -17,6 +17,7 @@ func main() {
 	app.Use(middleware.Cors())
 	app.GET("/channel", handler.GetChannel)
 	app.GET("/schedule", handler.GetSchedules)
-	app.GET("/vtuber", handler.GetVtubers)
+	app.GET("/vtubers", handler.GetVtubers)
+	app.GET("/vtuber", handler.GetVtubersDetail)
 	_ = app.Run(":8081")
 }
