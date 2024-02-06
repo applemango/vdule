@@ -83,7 +83,7 @@ func GetVtuberCoreHelper[T Row](row T) (*Vtuber, error) {
 }
 
 func GetVtuberCore(query string, args ...any) (*Vtuber, error) {
-	row := db.Conn.QueryRow(query, args)
+	row := db.Conn.QueryRow(query, args...)
 	return GetVtuberCoreHelper(row)
 }
 
@@ -93,7 +93,7 @@ func GetVtuberByHandle(handle string) (*Vtuber, error) {
 
 func GetVtubersCore(query string, args ...any) ([]Vtuber, error) {
 	var vs []Vtuber
-	rows, err := db.Conn.Query(query, args)
+	rows, err := db.Conn.Query(query, args...)
 	if err != nil {
 		return nil, err
 	}
