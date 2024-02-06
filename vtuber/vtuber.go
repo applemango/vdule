@@ -28,6 +28,33 @@ type Vtuber struct {
 	IsCrawl      bool                `json:"is_crawl,omitempty"`
 }
 
+func (v Vtuber) GetVtubersTag() ([]Tag, error) {
+	var tags []Tag
+	tagsRow, err := db.Conn.Query(`SELECT vt.id, vt.name FROM vtubers_tag JOIN main.vtuber_tag vt on vtubers_tag.tag_id = vt.id WHERE vtuber_id = ?`, v.Id)
+	if err != nil {
+		return nil, err
+	}
+	for tagsRow.Next() {
+		var tag Tag
+		err = tagsRow.Scan(&tag.Id, &tag.Name)
+		if err != nil {
+			return nil, err
+		}
+		tags = append(tags, tag)
+	}
+	return tags, nil
+}
+
+func GetVtubersOrganization(id int32) (*Organization, error) {
+	var organization Organization
+	row := db.Conn.QueryRow(`SELECT id, name, description FROM vtuber_organization WHERE id = ?`, id)
+	err := row.Scan(&organization.Id, &organization.Name, &organization.Description)
+	if err != nil {
+		return nil, err
+	}
+	return &organization, nil
+}
+
 func GetVtubers() ([]Vtuber, error) {
 	rows, err := db.Conn.Query(`SELECT id, handle, name, description, organization_id, is_crawl FROM vtuber`)
 	if err != nil {
@@ -37,9 +64,6 @@ func GetVtubers() ([]Vtuber, error) {
 	for rows.Next() {
 		var (
 			vtuber         Vtuber
-			organization   *Organization
-			tags           []Tag
-			channel        youtube.TubeChannel
 			organizationId sql.NullInt32
 		)
 		err = rows.Scan(&vtuber.Id, &vtuber.Handle, &vtuber.Name, &vtuber.Description, &organizationId, &vtuber.IsCrawl)
@@ -47,29 +71,15 @@ func GetVtubers() ([]Vtuber, error) {
 			return nil, err
 		}
 		if organizationId.Valid {
-			row := db.Conn.QueryRow(`SELECT id, name, description FROM vtuber_organization WHERE id = ?`, organizationId.Int32)
-			err = row.Scan(&organization.Id, &organization.Name, &organization.Description)
-			if err != nil {
-				return nil, err
+			if organization, err := GetVtubersOrganization(organizationId.Int32); err == nil {
+				vtuber.Organization = organization
 			}
 		}
 		c, _ := youtube.GetRawChannelByHandleCache(vtuber.Handle)
-		channel = youtube.ChannelToTubeChannel(c)
-		tagsRow, err := db.Conn.Query(`SELECT vt.id, vt.name FROM vtubers_tag JOIN main.vtuber_tag vt on vtubers_tag.tag_id = vt.id WHERE vtuber_id = ?`)
-		if err != nil {
-			return nil, err
+		vtuber.Channel = youtube.ChannelToTubeChannel(c)
+		if tags, err := vtuber.GetVtubersTag(); err == nil {
+			vtuber.Tags = tags
 		}
-		for tagsRow.Next() {
-			var tag Tag
-			err = tagsRow.Scan(&tag.Id, &tag.Name)
-			if err != nil {
-				return nil, err
-			}
-			tags = append(tags, tag)
-		}
-		vtuber.Organization = organization
-		vtuber.Tags = tags
-		vtuber.Channel = channel
 		vtubers = append(vtubers, vtuber)
 	}
 	return vtubers, nil
