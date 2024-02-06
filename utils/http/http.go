@@ -71,7 +71,7 @@ func HttpGetStruct[T any](url string, obj *T) error {
 		BaseURL: url,
 		Options: []interface{}{req.JSONEncode, req.JSONDecode},
 	}
-	client = client.WithHook(req.DebugHook(&req.DebugOptions{Body: true}))
+	//client = client.WithHook(req.DebugHook(&req.DebugOptions{}))
 	err := client.With(req.Request{
 		Method: http.MethodGet,
 	}).Fetch(&obj)
