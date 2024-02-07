@@ -4,6 +4,7 @@ import (
 	"errors"
 	"google.golang.org/api/youtube/v3"
 	"strconv"
+	"time"
 	"vdule/utils"
 	"vdule/utils/cache"
 )
@@ -19,8 +20,8 @@ type TubeVideo struct {
 	PublishedAt            string   `json:"published_at,omitempty"`
 	Tags                   []string `json:"tags,omitempty"`
 	LiveBroadCastContent   string   `json:"live_broad_cast_content,omitempty"`
-	isLive                 bool     `json:"is_live,omitempty"`
-	isLiveUpcoming         bool     `json:"is_live_upcoming,omitempty"`
+	IsLive                 bool     `json:"is_live,omitempty"`
+	IsLiveUpcoming         bool     `json:"is_live_upcoming,omitempty"`
 	LiveActualStartTime    string   `json:"live_actual_start_time,omitempty"`
 	LiveActualEndTime      string   `json:"live_actual_end_time,omitempty"`
 	LiveScheduledStartTime string   `json:"live_scheduled_start_time,omitempty"`
@@ -53,7 +54,7 @@ func (t *Tube) GetPlayListVideosId(id string, max int64) ([]string, error) {
 		return nil, err
 	}
 	cacheId := cache.GetCacheId("playlist", id, strconv.FormatInt(max, 10))
-	_ = cache.PushCache(cacheId, res)
+	_ = cache.PushCacheExp(cacheId, res, time.Minute*30)
 	var videos []string
 	for _, item := range res.Items {
 		videos = append(videos, item.ContentDetails.VideoId)
@@ -75,13 +76,13 @@ func (t *Tube) VideoIdsToVideos(ids []string) ([]*TubeVideo, error) {
 
 func FilterLive(videos []*TubeVideo) []*TubeVideo {
 	return utils.Filter(videos, func(video *TubeVideo) bool {
-		return video.isLive
+		return video.IsLive
 	})
 }
 
 func FilterUpcoming(videos []*TubeVideo) []*TubeVideo {
 	return utils.Filter(videos, func(video *TubeVideo) bool {
-		return video.isLiveUpcoming
+		return video.IsLiveUpcoming
 	})
 }
 
@@ -133,8 +134,8 @@ func VideoToTubeVideo(item *youtube.Video) TubeVideo {
 		PublishedAt:            item.Snippet.PublishedAt,
 		Tags:                   item.Snippet.Tags,
 		LiveBroadCastContent:   item.Snippet.LiveBroadcastContent,
-		isLive:                 isLive(item),
-		isLiveUpcoming:         item.Snippet.LiveBroadcastContent == "live",
+		IsLive:                 isLive(item),
+		IsLiveUpcoming:         item.Snippet.LiveBroadcastContent == "upcoming",
 		LiveActualStartTime:    actualStartTime,
 		LiveActualEndTime:      actualEndTime,
 		LiveScheduledStartTime: scheduledStartTime,
