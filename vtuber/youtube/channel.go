@@ -1,6 +1,7 @@
 package youtube
 
 import (
+	"errors"
 	"google.golang.org/api/youtube/v3"
 	"strings"
 	"vdule/utils/cache"
@@ -80,6 +81,50 @@ func (t *Tube) GetChannelByHandle(handle string) (*TubeChannel, error) {
 
 func GetChannelUploadPlayList(channel *youtube.Channel) string {
 	return channel.ContentDetails.RelatedPlaylists.Uploads
+}
+
+type PlayListVideosGenerator struct {
+	err        error
+	i          int32
+	PlayListId string
+	VideosId   []string
+}
+
+func (g *PlayListVideosGenerator) Next() bool {
+	if g.err != nil {
+		return false
+	}
+	g.i = g.i + 1
+	if g.i > 10 {
+		return false
+	}
+	return true
+}
+func (g *PlayListVideosGenerator) Get() (*youtube.Video, error) {
+	if g.i > 5 {
+		c, in := GetRawVideoCache(g.VideosId[g.i])
+		if !in {
+			return nil, errors.New("error")
+		}
+		return c, nil
+	}
+	id := g.VideosId[g.i]
+	video, err := T.GetRawVideo(id)
+	if err != nil {
+		g.err = err
+		return nil, err
+	}
+	return video, nil
+}
+func GetChannelUploadVideos(channel *youtube.Channel) PlayListVideosGenerator {
+	playList := GetChannelUploadPlayList(channel)
+	videosId, err := T.GetPlayListVideosId(playList, 50)
+	return PlayListVideosGenerator{
+		i:          0,
+		PlayListId: playList,
+		VideosId:   videosId,
+		err:        err,
+	}
 }
 
 func (t *Tube) GetChannelLive(handle string) ([]*TubeVideo, error) {
