@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strings"
 	"time"
-	"vdule/utils/db/sqlite3"
 	"vdule/utils/http"
 	youtube2 "vdule/vtuber/youtube"
 )
@@ -103,21 +102,16 @@ func RegisterHololiveSchedule() error {
 			}
 			id := ParseYoutubeVideoId(video.URL)
 			date := ParseHololiveApiDate(video.Datetime)
-			_, _ = db.Conn.Exec(`DELETE FROM video WHERE id = ?`, id)
-			_, err = db.Conn.Exec(`INSERT INTO video (
-			   	id,
-			   	channel_id,
-                handle,
-                title,
-                thumbnail,
-			   	is_live,
-                is_now_on_air,
-			   	live_scheduled_start_year,
-			   	live_scheduled_start_month,
-			   	live_scheduled_start_day,
-			   	live_scheduled_start_hour,
-            	live_scheduled_start_minute
-			) VALUES (?, ?, ?, ?, ?, true, ?, ?, ?, ?, ?, ?)`, id, channel.Id, youtube2.ParseChannelHandle(handle), video.Title, video.Thumbnail, video.IsLive, date.Year(), date.Month(), date.Day(), date.Hour(), date.Minute())
+			err := AddScheduleFromVideo(AddScheduleProps{
+				VideoId:    id,
+				ChannelId:  channel.Id,
+				Handle:     channel.Handle,
+				Title:      video.Title,
+				Thumbnail:  video.Thumbnail,
+				IsLive:     true,
+				IsNowOnAir: video.IsLive,
+				Date:       date,
+			})
 			if err != nil {
 				return err
 			}
