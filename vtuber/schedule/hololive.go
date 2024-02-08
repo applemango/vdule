@@ -102,7 +102,7 @@ func RegisterHololiveSchedule() error {
 			}
 			id := ParseYoutubeVideoId(video.URL)
 			date := ParseHololiveApiDate(video.Datetime)
-			err := AddScheduleFromVideo(AddScheduleProps{
+			err = AddScheduleFromVideo(AddScheduleProps{
 				VideoId:    id,
 				ChannelId:  channel.Id,
 				Handle:     channel.Handle,

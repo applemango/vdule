@@ -15,6 +15,14 @@ func hololive(ctx context.Context) (any, error) {
 	return nil, nil
 }
 
+func youtube(ctx context.Context) (any, error) {
+	err := schedule.RegisterYoutuberSchedule()
+	if err != nil {
+		println(err.Error())
+	}
+	return nil, nil
+}
+
 func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -22,6 +30,7 @@ func main() {
 	sched := quartz.NewStdScheduler()
 
 	every15, _ := quartz.NewCronTrigger("0 */15 * ? * *")
+	every30, _ := quartz.NewCronTrigger("0 */30 * ? * *")
 
 	_ = sched.ScheduleJob(
 		quartz.NewJobDetail(
@@ -29,6 +38,14 @@ func main() {
 			quartz.NewJobKey("hololive"),
 		),
 		every15,
+	)
+
+	_ = sched.ScheduleJob(
+		quartz.NewJobDetail(
+			job.NewFunctionJob(youtube),
+			quartz.NewJobKey("youtube"),
+		),
+		every30,
 	)
 
 	sched.Start(ctx)
