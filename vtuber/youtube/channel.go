@@ -95,7 +95,7 @@ func (g *PlayListVideosGenerator) Next() bool {
 		return false
 	}
 	g.i = g.i + 1
-	if g.i > 10 {
+	if g.i >= 5 {
 		return false
 	}
 	return true
@@ -120,7 +120,7 @@ func GetChannelUploadVideos(channel *youtube.Channel) PlayListVideosGenerator {
 	playList := GetChannelUploadPlayList(channel)
 	videosId, err := T.GetPlayListVideosId(playList, 50)
 	return PlayListVideosGenerator{
-		i:          0,
+		i:          -1,
 		PlayListId: playList,
 		VideosId:   videosId,
 		err:        err,
