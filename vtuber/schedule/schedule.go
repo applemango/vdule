@@ -2,6 +2,7 @@ package schedule
 
 import (
 	"database/sql"
+	"time"
 	db "vdule/utils/db/sqlite3"
 	"vdule/vtuber/youtube"
 )
@@ -69,4 +70,47 @@ func GetSchedules(year, month, day int) ([]Schedule, error) {
 
 func GetChannelSchedules(year, month, day int, handle string) ([]Schedule, error) {
 	return GetSchedulesCore(`SELECT id, handle, title, thumbnail, is_now_on_air, live_scheduled_start_year, live_scheduled_start_month, live_scheduled_start_day, live_scheduled_start_hour, live_scheduled_start_minute FROM video WHERE live_scheduled_start_year = ? AND live_scheduled_start_month = ? AND live_scheduled_start_day = ? AND is_live = true AND handle = ?`, year, month, day, handle)
+}
+
+func AddScheduleFromVideo(p AddScheduleProps) error {
+	_ = DeleteSomeSchedule(p)
+	_, err := db.Conn.Exec(
+		`INSERT INTO video (id, channel_id, handle, title, thumbnail, is_live, is_now_on_air, live_scheduled_start_year, live_scheduled_start_month, live_scheduled_start_day, live_scheduled_start_hour, live_scheduled_start_minute ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		p.VideoId, p.ChannelId, p.Handle, p.Title, p.Thumbnail, p.IsLive, p.IsNowOnAir, p.Date.Year(), p.Date.Month(), p.Date.Day(), p.Date.Hour(), p.Date.Minute(),
+	)
+	return err
+}
+
+type AddScheduleProps struct {
+	VideoId    string
+	ChannelId  string
+	Handle     string
+	Title      string
+	Thumbnail  string
+	IsLive     bool
+	IsNowOnAir bool
+	Date       time.Time
+}
+
+func DeleteNearTimeSchedule(handle string, date time.Time) error {
+	_, err := db.Conn.Exec(`DELETE FROM schedule WHERE handle = ? AND time_year = ? AND time_month = ? AND time_day = ? AND ( time_hour >= ? - 1 AND time_hour <= ? + 1 ) `, handle, date.Year(), date.Month(), date.Day(), date.Hour(), date.Hour())
+	return err
+}
+
+func DeleteSomeSchedule(p AddScheduleProps) error {
+	_, err := db.Conn.Exec(`DELETE FROM video WHERE id = ?`, p.VideoId)
+	if err != nil {
+		return err
+	}
+	err = DeleteNearTimeSchedule(p.Handle, p.Date)
+	return err
+}
+
+func AddSchedule(p AddScheduleProps) error {
+	_ = DeleteNearTimeSchedule(p.Handle, p.Date)
+	_, err := db.Conn.Exec(
+		`INSERT INTO schedule (channel_id, handle, title, thumbnail, time_year, time_month, time_day, time_hour ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+		p.ChannelId, p.Handle, p.Title, p.Thumbnail, p.Date.Year(), p.Date.Month(), p.Date.Day(), p.Date.Hour(),
+	)
+	return err
 }
