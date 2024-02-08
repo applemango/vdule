@@ -2,6 +2,7 @@ package schedule
 
 import (
 	"database/sql"
+	youtube2 "google.golang.org/api/youtube/v3"
 	"time"
 	db "vdule/utils/db/sqlite3"
 	"vdule/vtuber/youtube"
@@ -70,6 +71,21 @@ func GetSchedules(year, month, day int) ([]Schedule, error) {
 
 func GetChannelSchedules(year, month, day int, handle string) ([]Schedule, error) {
 	return GetSchedulesCore(`SELECT id, handle, title, thumbnail, is_now_on_air, live_scheduled_start_year, live_scheduled_start_month, live_scheduled_start_day, live_scheduled_start_hour, live_scheduled_start_minute FROM video WHERE live_scheduled_start_year = ? AND live_scheduled_start_month = ? AND live_scheduled_start_day = ? AND is_live = true AND handle = ?`, year, month, day, handle)
+}
+
+func AddScheduleFromRawVideo(channel youtube2.Channel, video youtube2.Video) error {
+	c := youtube.ChannelToTubeChannel(&channel)
+	v := youtube.VideoToTubeVideo(&video)
+	return AddScheduleFromVideo(AddScheduleProps{
+		VideoId:    video.Id,
+		ChannelId:  channel.Id,
+		Handle:     c.Handle,
+		Title:      v.Title,
+		Thumbnail:  v.Thumbnail,
+		IsLive:     v.IsLive,
+		IsNowOnAir: v.IsLiveNowOnAir,
+		Date:       v.LiveDate,
+	})
 }
 
 func AddScheduleFromVideo(p AddScheduleProps) error {
