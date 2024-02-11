@@ -9,7 +9,7 @@ import (
 	"vdule/vtuber/youtube"
 )
 
-func GetSchedules(c *gin.Context) {
+func GetSchedules(c *gin.Context) (int, any) {
 	var (
 		handle *string
 	)
@@ -30,18 +30,15 @@ func GetSchedules(c *gin.Context) {
 	}
 	if handle != nil {
 		if schedules, err := schedule.GetChannelSchedules(year, month, day, *handle); err == nil {
-			c.JSON(http.StatusOK, map[string]any{
+			return http.StatusOK, map[string]any{
 				"videos": schedules,
-			})
-			return
+			}
 		}
 	}
 	if schedules, err := schedule.GetSchedules(year, month, day); err == nil {
-		c.JSON(http.StatusOK, map[string]any{
+		return http.StatusOK, map[string]any{
 			"videos": schedules,
-		})
-		return
+		}
 	}
-	c.JSON(http.StatusInternalServerError, "500")
-	return
+	return http.StatusInternalServerError, "500"
 }
