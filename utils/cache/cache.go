@@ -3,6 +3,7 @@ package cache
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/gin-gonic/gin"
 	"time"
 	"vdule/utils"
 	"vdule/utils/db/redis"
@@ -42,4 +43,26 @@ func PushCacheExp(id Id, data any, exp time.Duration) error {
 		return err
 	}
 	return nil
+}
+
+func ResponseMiddleware(fn func(c *gin.Context) (int, any)) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		type Cache struct {
+			Status int
+			Json   any
+		}
+		url := c.Request.URL.String()
+		cacheId := GetCacheId("response", url)
+		if cache, in := GetCache(cacheId, &Cache{}); in {
+			c.JSON(cache.Status, cache.Json)
+			return
+		}
+		code, res := fn(c)
+		_ = PushCacheExp(cacheId, Cache{
+			Status: code,
+			Json:   res,
+		}, time.Minute)
+		c.JSON(code, res)
+		return
+	}
 }

@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"vdule/api/handler"
 	"vdule/api/middleware"
+	"vdule/utils/cache"
 	youtube2 "vdule/vtuber/youtube"
 )
 
@@ -16,7 +17,7 @@ func main() {
 	app := gin.Default()
 	app.Use(middleware.Cors())
 	app.GET("/channel", handler.GetChannel)
-	app.GET("/schedule", handler.GetSchedules)
+	app.GET("/schedule", cache.ResponseMiddleware(handler.GetSchedules))
 	app.GET("/vtubers", handler.GetVtubers)
 	app.GET("/vtuber", handler.GetVtubersDetail)
 	_ = app.Run(":8081")
