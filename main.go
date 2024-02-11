@@ -2,15 +2,19 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 	"vdule/api/handler"
 	"vdule/api/middleware"
 	"vdule/utils/cache"
-	youtube2 "vdule/vtuber/youtube"
+	y "vdule/vtuber/youtube"
 )
 
 func main() {
-
-	if youtube.T == nil {
+	err := godotenv.Load(".env")
+	if err != nil {
+		panic("failed load config")
+	}
+	if y.T == nil {
 		panic("youtube connection error")
 	}
 	gin.SetMode(gin.ReleaseMode)
