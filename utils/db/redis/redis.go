@@ -3,6 +3,7 @@ package redis
 import (
 	"context"
 	"fmt"
+	"github.com/joho/godotenv"
 	"os"
 	"time"
 
@@ -10,11 +11,19 @@ import (
 )
 
 var Ctx = context.Background()
-var DB = redis.NewClient(&redis.Options{
-	Addr:     fmt.Sprintf("127.0.0.1:%v", os.Getenv("DB_REDIS_PORT")),
-	Password: "",
-	DB:       0,
-})
+var DB = ConnectRedis()
+
+func ConnectRedis() *redis.Client {
+	err := godotenv.Load(".env")
+	if err != nil {
+		panic("failed load config")
+	}
+	return redis.NewClient(&redis.Options{
+		Addr:     fmt.Sprintf("127.0.0.1:%v", os.Getenv("DB_REDIS_PORT")),
+		Password: "",
+		DB:       0,
+	})
+}
 
 func Push(key, value string) error {
 	return PushExp(key, value, 0)
