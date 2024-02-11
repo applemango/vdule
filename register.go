@@ -2,12 +2,14 @@ package main
 
 import (
 	"context"
+	"github.com/joho/godotenv"
 	"github.com/reugn/go-quartz/job"
 	"github.com/reugn/go-quartz/quartz"
 	"vdule/vtuber/schedule"
+	youtube2 "vdule/vtuber/youtube"
 )
 
-func hololive(ctx context.Context) (any, error) {
+func RegisterHololiveSchedule(ctx context.Context) (any, error) {
 	err := schedule.RegisterHololiveSchedule()
 	if err != nil {
 		println(err.Error())
@@ -15,7 +17,7 @@ func hololive(ctx context.Context) (any, error) {
 	return nil, nil
 }
 
-func youtube(ctx context.Context) (any, error) {
+func RegisterYoutubeSchedule(ctx context.Context) (any, error) {
 	err := schedule.RegisterYoutuberSchedule()
 	if err != nil {
 		println(err.Error())
@@ -24,8 +26,17 @@ func youtube(ctx context.Context) (any, error) {
 }
 
 func main() {
+	err := godotenv.Load(".env")
+	if err != nil {
+		panic("failed load config")
+	}
+	youtube2.ResetYoutube()
+
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
+
+	_, _ = RegisterHololiveSchedule(ctx)
+	_, _ = RegisterYoutubeSchedule(ctx)
 
 	sched := quartz.NewStdScheduler()
 
@@ -34,7 +45,7 @@ func main() {
 
 	_ = sched.ScheduleJob(
 		quartz.NewJobDetail(
-			job.NewFunctionJob(hololive),
+			job.NewFunctionJob(RegisterHololiveSchedule),
 			quartz.NewJobKey("hololive"),
 		),
 		every15,
@@ -42,7 +53,7 @@ func main() {
 
 	_ = sched.ScheduleJob(
 		quartz.NewJobDetail(
-			job.NewFunctionJob(youtube),
+			job.NewFunctionJob(RegisterYoutubeSchedule),
 			quartz.NewJobKey("youtube"),
 		),
 		every30,

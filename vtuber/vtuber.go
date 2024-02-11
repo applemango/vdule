@@ -2,6 +2,7 @@ package vtuber
 
 import (
 	"database/sql"
+	"log"
 	db "vdule/utils/db/sqlite3"
 	"vdule/vtuber/youtube"
 )
@@ -74,7 +75,10 @@ func GetVtuberCoreHelper[T Row](row T) (*Vtuber, error) {
 			vtuber.Organization = organization
 		}
 	}
-	c, _ := youtube.GetRawChannelByHandleCache(vtuber.Handle)
+	c, in := youtube.GetRawChannelByHandleCache(vtuber.Handle)
+	if !in {
+		log.Fatal("not found")
+	}
 	vtuber.Channel = youtube.ChannelToTubeChannel(c)
 	if tags, err := vtuber.GetVtubersTag(); err == nil {
 		vtuber.Tags = tags

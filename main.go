@@ -14,6 +14,7 @@ func main() {
 	if err != nil {
 		panic("failed load config")
 	}
+	y.ResetYoutube()
 	if y.T == nil {
 		panic("youtube connection error")
 	}
