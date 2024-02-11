@@ -2,6 +2,8 @@ package redis
 
 import (
 	"context"
+	"fmt"
+	"os"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -9,7 +11,7 @@ import (
 
 var Ctx = context.Background()
 var DB = redis.NewClient(&redis.Options{
-	Addr:     "127.0.0.1:6381",
+	Addr:     fmt.Sprintf("127.0.0.1:%v", os.Getenv("DB_REDIS_PORT")),
 	Password: "",
 	DB:       0,
 })

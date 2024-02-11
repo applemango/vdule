@@ -5,6 +5,7 @@ go 1.20
 require (
 	github.com/gin-contrib/cors v1.5.0
 	github.com/gin-gonic/gin v1.9.1
+	github.com/joho/godotenv v1.5.1
 	github.com/mattn/go-sqlite3 v1.14.20
 	github.com/redis/go-redis/v9 v9.4.0
 	github.com/reugn/go-quartz v0.10.0

@@ -5,6 +5,7 @@ import (
 	"google.golang.org/api/youtube/v3"
 	"log"
 	"net/http"
+	"os"
 )
 
 type Tube struct {
@@ -14,8 +15,9 @@ type Tube struct {
 var T, _ = CreateTube()
 
 func CreateTube() (*Tube, error) {
+	apiKey := os.Getenv("YOUTUBE_DATA_API_KEY")
 	client := &http.Client{
-		Transport: &transport.APIKey{Key: "AIzaSyA2KkxjSd-s5ydoVPCym9yOH9lsyInxoKE"},
+		Transport: &transport.APIKey{Key: apiKey},
 	}
 	service, err := youtube.New(client)
 	if err != nil {
