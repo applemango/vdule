@@ -54,6 +54,10 @@ func (t *Tube) GetRawChannelByHandle(handle string) (*youtube.Channel, error) {
 }
 
 func ChannelToTubeChannel(channel *youtube.Channel) TubeChannel {
+	banner := ""
+	if channel.BrandingSettings.Image != nil {
+		banner = channel.BrandingSettings.Image.BannerExternalUrl
+	}
 	return TubeChannel{
 		Id:              channel.Id,
 		Name:            channel.Snippet.Title,
@@ -65,9 +69,9 @@ func ChannelToTubeChannel(channel *youtube.Channel) TubeChannel {
 		ViewCount:       channel.Statistics.ViewCount,
 		SubscriberCount: channel.Statistics.SubscriberCount,
 		VideoCount:      channel.Statistics.VideoCount,
-		//Trailer:         channel.BrandingSettings.Channel.UnsubscribedTrailer,		//Trailer:         channel.BrandingSettings.Channel.UnsubscribedTrailer,
-		BannerImage: channel.BrandingSettings.Image.BannerExternalUrl,
+		BannerImage:     banner,
 	}
+	//Trailer:         channel.BrandingSettings.Channel.UnsubscribedTrailer,
 }
 
 func (t *Tube) GetChannelByHandle(handle string) (*TubeChannel, error) {
