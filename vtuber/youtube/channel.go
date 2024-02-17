@@ -53,6 +53,13 @@ func (t *Tube) GetRawChannelByHandle(handle string) (*youtube.Channel, error) {
 	return res.Items[0], nil
 }
 
+func NullbleToSafeValue[T any](pointer *T, defaultValue T) T {
+	if pointer != nil {
+		return *pointer
+	}
+	return defaultValue
+}
+
 func ChannelToTubeChannel(channel *youtube.Channel) TubeChannel {
 	banner := ""
 	if channel.BrandingSettings.Image != nil {
@@ -66,9 +73,9 @@ func ChannelToTubeChannel(channel *youtube.Channel) TubeChannel {
 		PublishAt:       channel.Snippet.PublishedAt,
 		IconImage:       channel.Snippet.Thumbnails.High.Url,
 		UploadsPlaylist: channel.ContentDetails.RelatedPlaylists.Uploads,
-		ViewCount:       channel.Statistics.ViewCount,
-		SubscriberCount: channel.Statistics.SubscriberCount,
-		VideoCount:      channel.Statistics.VideoCount,
+		ViewCount:       NullbleToSafeValue(&channel.Statistics.ViewCount, 0),
+		SubscriberCount: NullbleToSafeValue(&channel.Statistics.SubscriberCount, 0),
+		VideoCount:      NullbleToSafeValue(&channel.Statistics.VideoCount, 0),
 		BannerImage:     banner,
 	}
 	//Trailer:         channel.BrandingSettings.Channel.UnsubscribedTrailer,
