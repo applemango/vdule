@@ -2,7 +2,6 @@ package schedule
 
 import (
 	"fmt"
-	"strings"
 	"time"
 	"vdule/utils/http"
 	youtube2 "vdule/vtuber/youtube"
@@ -52,10 +51,10 @@ func ParseHololiveApiDate(datetime string) time.Time {
 	return date
 }
 
-func ParseYoutubeVideoId(url string) string {
+/*func ParseYoutubeVideoId(url string) string {
 	id := strings.Split(url, "=")[1]
 	return id
-}
+}*/
 
 var HololiveChannelId = map[string]string{
 	"ときのそら":    "TokinoSora",
@@ -114,7 +113,7 @@ func RegisterHololiveSchedule() error {
 			if err != nil {
 				return err
 			}
-			id := ParseYoutubeVideoId(video.URL)
+			id := ParseYoutubeUrl(video.URL)
 			date := ParseHololiveApiDate(video.Datetime)
 			err = AddScheduleFromVideo(AddScheduleProps{
 				VideoId:    id,
