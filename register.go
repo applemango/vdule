@@ -25,6 +25,14 @@ func RegisterYoutubeSchedule(ctx context.Context) (any, error) {
 	return nil, nil
 }
 
+func RegisterNijisanjiSchedule(ctx context.Context) (any, error) {
+	err := schedule.RegisterNijisanjiSchedule()
+	if err != nil {
+		println(err.Error())
+	}
+	return nil, nil
+}
+
 func main() {
 	err := godotenv.Load(".env")
 	if err != nil {
@@ -37,6 +45,7 @@ func main() {
 
 	_, _ = RegisterHololiveSchedule(ctx)
 	_, _ = RegisterYoutubeSchedule(ctx)
+	_, _ = RegisterNijisanjiSchedule(ctx)
 
 	sched := quartz.NewStdScheduler()
 
@@ -47,6 +56,14 @@ func main() {
 		quartz.NewJobDetail(
 			job.NewFunctionJob(RegisterHololiveSchedule),
 			quartz.NewJobKey("hololive"),
+		),
+		every15,
+	)
+
+	_ = sched.ScheduleJob(
+		quartz.NewJobDetail(
+			job.NewFunctionJob(RegisterNijisanjiSchedule),
+			quartz.NewJobKey("nijisanji"),
 		),
 		every15,
 	)
