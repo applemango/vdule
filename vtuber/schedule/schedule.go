@@ -2,6 +2,8 @@ package schedule
 
 import (
 	"database/sql"
+	"errors"
+	"fmt"
 	youtube2 "google.golang.org/api/youtube/v3"
 	"time"
 	db "vdule/utils/db/sqlite3"
@@ -32,7 +34,14 @@ type Row interface {
 
 func GetScheduleCore[T Row](row T) (*Schedule, error) {
 	var (
-		s Schedule
+		s Schedule = Schedule{
+			Id:         "",
+			Date:       ScheduleDate{},
+			Channel:    youtube.TubeChannel{},
+			IsNowOnAir: false,
+			Title:      "",
+			Thumbnail:  "",
+		}
 		d ScheduleDate
 	)
 	var handle string
@@ -42,7 +51,7 @@ func GetScheduleCore[T Row](row T) (*Schedule, error) {
 	}
 	channel, in := youtube.GetRawChannelByHandleCache(handle)
 	if !in {
-		return nil, err
+		return nil, errors.New("channel cache not found")
 	}
 	s.Channel = youtube.ChannelToTubeChannel(channel)
 	s.Date = d
@@ -58,6 +67,7 @@ func GetSchedulesCore(query string, args ...any) ([]Schedule, error) {
 	for rows.Next() {
 		schedule, err := GetScheduleCore(rows)
 		if err != nil {
+			fmt.Printf("%v\n", err.Error())
 			continue
 		}
 		schedules = append(schedules, *schedule)
