@@ -23,7 +23,7 @@ type TubeChannel struct {
 }
 
 func GetRawChannelByHandleCache(handle string) (*youtube.Channel, bool) {
-	cacheId := cache.GetCacheId("channel", "handle", handle)
+	cacheId := cache.GetCacheId("channel", "handle", ParseChannelHandle(handle))
 	if c, in := cache.GetCache(cacheId, &youtube.Channel{}); in {
 		return c, true
 	}
